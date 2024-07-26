@@ -44,15 +44,4 @@ class ApiClient {
     }
   }
 
-  Future<dynamic> postRequest({
-    required String endPoint,
-    Map<String, dynamic> parameters = const {},
-  }) async {
-    try {
-      final response = await _dio.post(endPoint, data: parameters);
-      return response;
-    } on DioException catch (e) {
-      rethrow;
-    }
-  }
 }
