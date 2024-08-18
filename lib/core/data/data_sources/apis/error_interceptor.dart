@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:weather_map_md_labs/core/data/data_sources/exceptions/weather_exception.dart';
 
 class ErrorInterceptor extends Interceptor {
@@ -22,6 +23,7 @@ class ErrorInterceptor extends Interceptor {
         title: err.response?.statusCode.toString() ?? "",
       );
     } else if (err.type == DioExceptionType.badResponse) {
+      debugPrint("Bad response received $err");
       weatherException = WeatherException(
         message: err.response?.data['message'] ?? "Unknown error",
         title: err.response?.statusCode.toString() ?? "",
@@ -37,6 +39,7 @@ class ErrorInterceptor extends Interceptor {
         message: 'Please check your internet connection',
       );
     } else {
+      debugPrint("Received unknown exception");
       weatherException = WeatherException(
         message: "Unexpected Error",
         title: err.response?.statusCode.toString() ?? "",

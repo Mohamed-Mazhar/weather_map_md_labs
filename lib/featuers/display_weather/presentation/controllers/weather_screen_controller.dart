@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:weather_map_md_labs/core/data/data_sources/exceptions/weather_exception.dart';
 import 'package:weather_map_md_labs/featuers/display_weather/data/models/weather_info.dart';
 import 'package:weather_map_md_labs/featuers/display_weather/data/services/weather_api_service.dart';
 
@@ -30,22 +28,41 @@ class WeatherScreenController extends GetxController {
     super.onInit();
   }
 
-  Future<void> getWeatherInfo() async {
+  //Using Api Response class
+  Future<void> getWeather() async {
     weatherInfo.value = null;
     isLoading(true);
-    try {
-      final response = await _weatherApiService.getWeatherInfo(city: cityController.text);
-      weatherInfo(response);
+    final latLangResponse = await _weatherApiService.getCityLatLang(city: cityController.text);
+    if (!latLangResponse.success) {
       isLoading(false);
-    } on WeatherException catch (e) {
-      debugPrint("Exception caught inside controller $e");
+      showError("Please enter a valid city name");
+    } else {
+      final weatherInfoResponse = await _weatherApiService.getCityWeatherInfo(latLangResponse.data!);
       isLoading(false);
-      showError(e);
-    } catch (e) {
-      isLoading(false);
-      showError(WeatherException(title: 'unknown error', message: 'Parsing error'));
+      if (weatherInfoResponse.success) {
+        weatherInfo.value = weatherInfoResponse.data;
+      } else {
+        showError(weatherInfoResponse.error ?? "");
+      }
     }
   }
+
+//Using weather Exception directly
+// Future<void> getWeatherInfo() async {
+//   weatherInfo.value = null;
+//   isLoading(true);
+//   try {
+//     final response = await _weatherApiService.getWeatherInfo(city: cityController.text);
+//     weatherInfo(response);
+//     isLoading(false);
+//   } on WeatherException catch (e) {
+//     isLoading(false);
+//     showError(e.message);
+//   } catch (e) {
+//     isLoading(false);
+//     showError("Unknown Error");
+//   }
+// }
 
   @override
   void dispose() {
@@ -53,20 +70,17 @@ class WeatherScreenController extends GetxController {
     super.dispose();
   }
 
-  void showError(WeatherException e) {
-    Get.snackbar(
-      e.title,
-      e.message,
-      snackPosition: SnackPosition.BOTTOM,
-      forwardAnimationCurve: Curves.easeInOutCubic,
-      reverseAnimationCurve: Curves.easeInOutCubic,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      icon: const Icon(
-        Icons.error,
-        color: Colors.white,
-      )
-    );
+  void showError(String message) {
+    Get.snackbar('Error', message,
+        snackPosition: SnackPosition.BOTTOM,
+        forwardAnimationCurve: Curves.easeInOutCubic,
+        reverseAnimationCurve: Curves.easeInOutCubic,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        icon: const Icon(
+          Icons.error,
+          color: Colors.white,
+        ));
   }
 }

@@ -42,7 +42,7 @@ class WeatherScreen extends StatelessWidget {
                       isEnabled: controller.isButtonActive.value,
                       text: 'Get',
                       onTap: () {
-                        controller.getWeatherInfo();
+                        controller.getWeather();
                       },
                     );
                   },
